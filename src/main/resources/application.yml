@@ -1,0 +1,140 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: tunnel-ai-service
+
+  # MySQL 数据源配置（主库）
+  datasource:
+    mysql:
+      jdbc-url: jdbc:mysql://192.168.74.55:3306/vispower-cloud?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+      username: root
+      password: Vispower@123
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      hikari:
+        maximum-pool-size: 20
+        minimum-idle: 5
+        connection-timeout: 30000
+        idle-timeout: 600000
+        max-lifetime: 1800000
+        connection-test-query: SELECT 1
+
+    # ClickHouse 数据源配置
+    clickhouse:
+      jdbc-url: jdbc:clickhouse://192.168.74.55:8123/vp_bigdata
+      username: vispower
+      password: Vispower@123
+      driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+      hikari:
+        maximum-pool-size: 10
+        minimum-idle: 2
+        connection-timeout: 30000
+        idle-timeout: 300000
+        max-lifetime: 900000
+
+  # AI配置
+  ai:
+    openai:
+      base-url: http://192.168.74.119:8000
+      api-key: dummy-key
+      chat:
+        options:
+          model: "Qwen/Qwen2.5-Coder-32B-Instruct-AWQ"
+          temperature: 0.7
+          max-tokens: 2000
+
+  main:
+    allow-bean-definition-overriding: true
+
+  jackson:
+    default-property-inclusion: non_null
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    org.springframework.ai: DEBUG
+    org.springframework.jdbc: DEBUG
+    com.vispower.ai: DEBUG
+    com.clickhouse: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# 自定义隧道系统配置
+tunnel:
+  # 数据查询配置
+  query:
+    timeout: 30
+    max-records: 1000
+    enable-cache: true
+    cache-ttl: 300
+
+  # 表配置映射
+  tables:
+    vehicle: "vp_tunnel_vehicle"
+    event: "vp_event"
+    facility: "vp_facility"
+    environment: "vp_environment"
+    analytics: "vp_analytics"
+
+  # 事件类型映射
+  event-types:
+    1: "逆向行驶"
+    2: "行人入侵机动车道"
+    3: "异常停车"
+    4: "路段拥堵"
+    5: "交通事故"
+    6: "违法超速"
+    7: "急加速"
+    8: "急减速"
+    9: "违规变道"
+    10: "抛洒物"
+    11: "危化品车辆"
+    12: "动物入侵"
+
+  # 颜色映射
+  colors:
+    plate:
+      1: "蓝色"
+      2: "黄色"
+      3: "白色"
+      4: "黑色"
+      5: "绿色"
+      6: "红色"
+    vehicle:
+      1: "白色"
+      2: "银色"
+      3: "黑色"
+      4: "红色"
+      5: "蓝色"
+      6: "黄色"
+      7: "绿色"
+      8: "棕色"
+      9: "灰色"
+
+  # AI提示词配置
+  ai:
+    system-prompt: "你是专业的隧道交通管理智能助手，擅长分析交通数据并提供专业建议。"
+    max-retries: 3
+    enable-context: true
+
+  # 数据源路由配置
+  datasource:
+    # 实时查询使用MySQL
+    realtime: mysql
+    # 分析查询使用ClickHouse
+    analytics: clickhouse
+    # 默认数据源
+    default: mysql
+
+# ClickHouse特定配置
+clickhouse:
+  # 查询优化
+  query:
+    max-memory-usage: 10000000000
+    max-execution-time: 300
+    # 启用分布式查询
+    distributed: false
