@@ -304,7 +304,372 @@ public class TableMetadataManager {
                         "异常停车事件"
                 ))
                 .build();
+        // 1. CO/VI检测器表
+        TableMetadata coViTable = TableMetadata.builder()
+                .tableName("co_vi")
+                .description("一氧化碳和能见度检测器，监测隧道内空气质量")
+                .columns(Arrays.asList(
+                        ColumnMetadata.builder()
+                                .columnName("device_code")
+                                .dataType("VARCHAR")
+                                .description("设备编号")
+                                .isPrimaryKey(true)
+                                .isSearchable(true)
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("device_name")
+                                .dataType("VARCHAR")
+                                .description("设备名称")
+                                .isSearchable(true)
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("co_value")
+                                .dataType("DOUBLE")
+                                .description("一氧化碳浓度值")
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("vi_value")
+                                .dataType("DOUBLE")
+                                .description("能见度值")
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("net_road_id")
+                                .dataType("BIGINT")
+                                .description("隧道ID（0-10对应不同隧道）")
+                                .enumValues(Arrays.asList("0-桑园子隧道", "1-冰草湾隧道", "2-梨园一号隧道"))
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("comm_state")
+                                .dataType("VARCHAR")
+                                .description("通讯状态")
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("fault_state")
+                                .dataType("VARCHAR")
+                                .description("故障状态")
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("update_time")
+                                .dataType("DATETIME")
+                                .description("更新时间")
+                                .isDateField(true)
+                                .build()
+                ))
+                .commonQueries(Arrays.asList(
+                        "查询所有CO浓度超标的设备",
+                        "查询某隧道的能见度情况",
+                        "查询故障的CO/VI检测器"
+                ))
+                .build();
 
+        // 2. 风机表
+        TableMetadata fanTable = TableMetadata.builder()
+                .tableName("draught_fan")
+                .description("隧道通风风机，用于隧道内空气流通")
+                .columns(Arrays.asList(
+                        ColumnMetadata.builder()
+                                .columnName("device_code")
+                                .dataType("VARCHAR")
+                                .description("设备编号")
+                                .isPrimaryKey(true)
+                                .isSearchable(true)
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("current_state")
+                                .dataType("VARCHAR")
+                                .description("当前状态（运行/停止）")
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("net_road_id")
+                                .dataType("BIGINT")
+                                .description("隧道ID")
+                                .build()
+                ))
+                .commonQueries(Arrays.asList(
+                        "查询所有运行中的风机",
+                        "查询某隧道的风机状态",
+                        "查询故障风机"
+                ))
+                .build();
+
+        // 3. 紧急电话表
+        TableMetadata phoneTable = TableMetadata.builder()
+                .tableName("emergency_phone")
+                .description("隧道紧急电话设备，用于紧急求助")
+                .columns(Arrays.asList(
+                        ColumnMetadata.builder()
+                                .columnName("device_code")
+                                .dataType("VARCHAR")
+                                .description("设备编号")
+                                .isPrimaryKey(true)
+                                .isSearchable(true)
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("current_state")
+                                .dataType("VARCHAR")
+                                .description("当前状态（erok正常/call通话中/nerr故障/pick监听/offline离线）")
+                                .enumValues(Arrays.asList("erok-正常", "call-通话中", "nerr-故障", "pick-监听", "offline-离线"))
+                                .build()
+                ))
+                .commonQueries(Arrays.asList(
+                        "查询正在通话的紧急电话",
+                        "查询离线的紧急电话",
+                        "查询某隧道的紧急电话状态"
+                ))
+                .build();
+
+        // 4. 火灾报警表
+        TableMetadata fireAlarmTable = TableMetadata.builder()
+                .tableName("fire_alarm")
+                .description("消防火灾报警设备，监测火灾情况")
+                .columns(Arrays.asList(
+                        ColumnMetadata.builder()
+                                .columnName("is_warning")
+                                .dataType("TINYINT")
+                                .description("是否处于报警状态（0否/1是）")
+                                .enumValues(Arrays.asList("0-正常", "1-报警"))
+                                .build()
+                ))
+                .commonQueries(Arrays.asList(
+                        "查询所有火灾报警设备",
+                        "查询正在报警的设备",
+                        "查询某隧道的火灾报警状态"
+                ))
+                .build();
+
+        // 5. 情报板表
+        TableMetadata intelBoardTable = TableMetadata.builder()
+                .tableName("intel_board")
+                .description("可变情报板，显示交通信息和警示信息")
+                .columns(Arrays.asList(
+                        ColumnMetadata.builder()
+                                .columnName("content")
+                                .dataType("VARCHAR")
+                                .description("显示内容")
+                                .isSearchable(true)
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("color")
+                                .dataType("VARCHAR")
+                                .description("文字颜色")
+                                .build()
+                ))
+                .commonQueries(Arrays.asList(
+                        "查询所有情报板显示内容",
+                        "查询某隧道的情报板",
+                        "查询故障的情报板"
+                ))
+                .build();
+
+        // 6. 车道指示器表
+        TableMetadata laneIndicateTable = TableMetadata.builder()
+                .tableName("lane_indicate")
+                .description("车道指示器，显示车道开放状态")
+                .columns(Arrays.asList(
+                        ColumnMetadata.builder()
+                                .columnName("front_state")
+                                .dataType("VARCHAR")
+                                .description("正面状态（green绿箭/red红叉/black黑屏/left左转）")
+                                .enumValues(Arrays.asList("green-绿箭", "red-红叉", "black-黑屏", "left-左转"))
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("back_state")
+                                .dataType("VARCHAR")
+                                .description("背面状态")
+                                .build()
+                ))
+                .commonQueries(Arrays.asList(
+                        "查询红叉状态的车道",
+                        "查询某隧道的车道状态",
+                        "查询所有绿箭车道"
+                ))
+                .build();
+
+        // 7. 亮度检测器表
+        TableMetadata luminousTable = TableMetadata.builder()
+                .tableName("luminous_detect")
+                .description("洞内外亮度检测器，监测光照强度")
+                .columns(Arrays.asList(
+                        ColumnMetadata.builder()
+                                .columnName("type")
+                                .dataType("TINYINT")
+                                .description("类型（0洞内/1洞外）")
+                                .enumValues(Arrays.asList("0-洞内光强", "1-洞外光强"))
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("brightness")
+                                .dataType("DOUBLE")
+                                .description("光照强度值")
+                                .build()
+                ))
+                .commonQueries(Arrays.asList(
+                        "查询洞外光照强度",
+                        "查询洞内光照强度",
+                        "查询某隧道的光照情况"
+                ))
+                .build();
+
+        // 8. 感温光栅表
+        TableMetadata rasterTable = TableMetadata.builder()
+                .tableName("raster")
+                .description("感温光栅，监测隧道温度")
+                .columns(Arrays.asList(
+                        ColumnMetadata.builder()
+                                .columnName("temp")
+                                .dataType("DOUBLE")
+                                .description("温度值")
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("is_error")
+                                .dataType("TINYINT")
+                                .description("设备是否错误")
+                                .build()
+                ))
+                .commonQueries(Arrays.asList(
+                        "查询温度异常的位置",
+                        "查询某隧道的温度",
+                        "查询故障的感温光栅"
+                ))
+                .build();
+
+        // 9. 卷帘门表
+        TableMetadata rollDoorTable = TableMetadata.builder()
+                .tableName("roll_door")
+                .description("隧道卷帘门，用于紧急封闭")
+                .columns(Arrays.asList(
+                        ColumnMetadata.builder()
+                                .columnName("state")
+                                .dataType("VARCHAR")
+                                .description("状态（up上升/down下降/stop停止/error异常/up_limit上到位/down_limit下到位）")
+                                .enumValues(Arrays.asList("up-上升", "down-下降", "stop-停止", "error-异常", "up_limit-上到位", "down_limit-下到位"))
+                                .build()
+                ))
+                .commonQueries(Arrays.asList(
+                        "查询卷帘门状态",
+                        "查询正在动作的卷帘门",
+                        "查询异常的卷帘门"
+                ))
+                .build();
+
+        // 10. 照明表
+        TableMetadata lampTable = TableMetadata.builder()
+                .tableName("sansi_lamp")
+                .description("隧道照明设备")
+                .columns(Arrays.asList(
+                        ColumnMetadata.builder()
+                                .columnName("current_state")
+                                .dataType("VARCHAR")
+                                .description("状态（light_on开启/light_off关闭）")
+                                .enumValues(Arrays.asList("light_on-照明开启", "light_off-照明关闭"))
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("bright")
+                                .dataType("INT")
+                                .description("亮度值")
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("mode")
+                                .dataType("INT")
+                                .description("运行模式（6自动/7手动/255未知）")
+                                .enumValues(Arrays.asList("6-自动模式", "7-手动模式", "255-未知模式"))
+                                .build()
+                ))
+                .commonQueries(Arrays.asList(
+                        "查询关闭的照明",
+                        "查询某隧道的照明状态",
+                        "查询手动模式的照明"
+                ))
+                .build();
+
+        // 11. 烟感表
+        TableMetadata smokingTable = TableMetadata.builder()
+                .tableName("smoking")
+                .description("烟雾感应器，检测火灾烟雾")
+                .columns(Arrays.asList(
+                        ColumnMetadata.builder()
+                                .columnName("is_warning")
+                                .dataType("TINYINT")
+                                .description("是否报警状态")
+                                .build()
+                ))
+                .commonQueries(Arrays.asList(
+                        "查询烟感报警",
+                        "查询某隧道的烟感状态"
+                ))
+                .build();
+
+        // 12. 交通信号灯表
+        TableMetadata trafficLightTable = TableMetadata.builder()
+                .tableName("traffic_light")
+                .description("隧道交通信号灯")
+                .columns(Arrays.asList(
+                        ColumnMetadata.builder()
+                                .columnName("state")
+                                .dataType("VARCHAR")
+                                .description("信号灯状态")
+                                .build()
+                ))
+                .commonQueries(Arrays.asList(
+                        "查询交通信号灯状态",
+                        "查询某隧道的信号灯"
+                ))
+                .build();
+
+        // 13. 水泵表
+        TableMetadata waterPumpTable = TableMetadata.builder()
+                .tableName("water_pump")
+                .description("隧道排水水泵")
+                .columns(Arrays.asList(
+                        ColumnMetadata.builder()
+                                .columnName("current_state")
+                                .dataType("VARCHAR")
+                                .description("状态（wapu_on启动/wapu_off停止）")
+                                .enumValues(Arrays.asList("wapu_on-启动", "wapu_off-停止"))
+                                .build()
+                ))
+                .commonQueries(Arrays.asList(
+                        "查询运行中的水泵",
+                        "查询某隧道的水泵状态"
+                ))
+                .build();
+
+        // 14. 风速风向表
+        TableMetadata windDetectorTable = TableMetadata.builder()
+                .tableName("wind_detector")
+                .description("风速风向检测器，监测隧道内风速风向")
+                .columns(Arrays.asList(
+                        ColumnMetadata.builder()
+                                .columnName("wind_speed")
+                                .dataType("DOUBLE")
+                                .description("风速")
+                                .build(),
+                        ColumnMetadata.builder()
+                                .columnName("wind_direction")
+                                .dataType("VARCHAR")
+                                .description("风向")
+                                .build()
+                ))
+                .commonQueries(Arrays.asList(
+                        "查询风速情况",
+                        "查询某隧道的风向"
+                ))
+                .build();
+
+        // 将所有表添加到管理器
+        tableMetadataMap.put("co_vi", coViTable);
+        tableMetadataMap.put("draught_fan", fanTable);
+        tableMetadataMap.put("emergency_phone", phoneTable);
+        tableMetadataMap.put("fire_alarm", fireAlarmTable);
+        tableMetadataMap.put("intel_board", intelBoardTable);
+        tableMetadataMap.put("lane_indicate", laneIndicateTable);
+        tableMetadataMap.put("luminous_detect", luminousTable);
+        tableMetadataMap.put("raster", rasterTable);
+        tableMetadataMap.put("roll_door", rollDoorTable);
+        tableMetadataMap.put("sansi_lamp", lampTable);
+        tableMetadataMap.put("smoking", smokingTable);
+        tableMetadataMap.put("traffic_light", trafficLightTable);
+        tableMetadataMap.put("water_pump", waterPumpTable);
+        tableMetadataMap.put("wind_detector", windDetectorTable);
         tableMetadataMap.put("vp_tunnel_vehicle", tunnelVehicleMetadata);
         tableMetadataMap.put("vp_event", eventMetadata);
     }
